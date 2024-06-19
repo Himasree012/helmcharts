@@ -1,20 +1,33 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: node-hello
+  name: my-helm-app
   namespace: argocd
 spec:
   project: default
+
   source:
-    repoURL: 'https://github.com/<your-github-username>/node-hello.git'
-    targetRevision: HEAD
-    path: helm/node-hello
+    repoURL: 'https://charts.helm.sh/stable'
+    targetRevision: 1.0.0
+    chart: my-chart
+    helm:
+      valueFiles:
+        - values.yaml
+      values: |
+        replicaCount: 2
+        image:
+          repository: my-image
+          tag: latest
+        service:
+          type: ClusterIP
+
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: default
+
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
-      - CreateNamespace=true
+    - CreateNamespace=true
